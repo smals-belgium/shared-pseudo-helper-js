@@ -1,6 +1,6 @@
 {
   "name": "@smals-belgium-shared/pseudo-helper",
-  "version": "1.0.5",
+  "version": "1.0.6",
   "description": "Pseudonimization helper (Blind, Unblind, ...)",
   "type": "module",
   "exports": "./index.mjs",
@@ -22,7 +22,6 @@
     "build": "node build.js"
   },
   "dependencies": {
-    "@smals-belgium-shared/pseudo-helper": "^1.0.0",
     "bn.js": "^5.2.1",
     "buffer": "^6.0.3",
     "elliptic": "^6.5.7",
