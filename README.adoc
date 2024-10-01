@@ -1,0 +1,411 @@
+= Smals Pseudonymisation Helper
+:authors: Laurent Lamouline and Mieke Nijs
+:version: 0.1
+:lang: en
+:icons: font
+:toc:
+:toc-placement!:
+
+:links-ehealth-doc: https://portal.api.ehealth.fgov.be/api-details?apiId=eb8015c0-693b-4c4f-bab9-f671d35ddc15&managerId=1&Itemid=171&catalogModuleId=120[eHealth Pseudonymisation service]
+
+toc::[]
+
+== Introduction
+The Pseudonymization Helper is designed to pseudonymize sensitive data while also providing functionalities to identify/retrieve original values. This mechanism is essential for ensuring data privacy and security in applications that needs to handle personal or sensitive information.
+
+== Features
+
+* *pseudonymize :* Transform a clear text representation of sensitive data into its pseudonymized format.
+* *pseudonymizeMultiple :* Transform multiple clear text representations of sensitive data into their pseudonymized format.
+* *identify :* Retrieve the original clear text value based on its pseudonymized representation.
+* *identifyMultiple :* Retrieve the original clear text values based on an array of pseudonymized data.
+
+== Installation
+To install the Pseudonymization Helper, use the following command:
+----
+npm install @smals-belgium-shared/pseudo-helper
+----
+== Usage
+
+=== Creating a custom pseudonymisation client
+First, implement the interface to call the eHealth Pseudonymization service. Create a custom class that extends PseudonymisationClient and overrides the predefined methods. The pseudonymisationClient is mandatory in all use cases.
+
+Sample code to create a Custom Pseudonymisation Client
+[source,javascript]
+----
+import {PseudonymisationClient} from "@smals-belgium-shared/pseudo-helper"
+
+export class CustomPseudonymisationClient extends PseudonymisationClient {
+
+  // Your pseudo api url
+  private readonly pseudoApiUrl = 'https://${api-host-and-port}pseudo/v1/domains/';
+
+  // built-in service used for making HTTP requests to backend servers
+   constructor(private http: HttpClient (or AxiosInstance ...)) {
+  }
+
+  // Override the getDomain method
+  getDomain(domainKey: string): Promise<string> {
+     const request$ = this.http.get(this.pseudoApiUrl + domainKey);
+
+    return lastValueFrom(request$);
+  }
+
+  // Override the identify method
+  identify(domainKey: string, payload: string): Promise<string> {
+   const request$ = this.http.post(this.pseudoApiUrl + domainKey + '/identify', payload).pipe(map(response => JSON.stringify(response)));
+
+    return lastValueFrom(request$);
+  }
+
+  // Override the identifyMultiple method
+  identifyMultiple(domainKey: string, payload: string): Promise<string> {
+     const request$ = this.http.post(this.pseudoApiUrl + domainKey + '/identifyMultiple', payload).pipe(map(response => JSON.stringify(response)));
+
+     return lastValueFrom(request$);
+  }
+
+  // Override the pseudonymize method
+  pseudonymize(domainKey: string, payload: string): Promise<string> {
+    const request$ = this.http.post(this.pseudoApiUrl + domainKey + '/pseudonymize', payload).pipe(map(response => JSON.stringify(response)))
+
+    return lastValueFrom(request$)
+  }
+
+  // Override the pseudonymizeMultiple method
+  pseudonymizeMultiple(domainKey: string, payload: string): Promise<string> {
+    const request$ = this.http.post(this.pseudoApiUrl + domainKey + '/pseudonymizeMultiple', payload).pipe(map(response => JSON.stringify(response)));
+
+    return lastValueFrom(request$);
+  }
+}
+----
+
+=== Creating a custom Pseudonymisation Helper
+Next, create a custom PseudonymisationHelper were you instantiate a new object of the PseudonymisationHelper class, passing the custom client as an argument to its constructor.
+
+Sample code to create a Custom Pseudonymisation Client
+[source,javascript]
+----
+import { PseudonymisationHelper } from '@smals-belgium-shared/pseudo-helper';
+import { CustomPseudonymisationClient} from "../client/customPseudonymisation.client";
+
+export function PseudonymisationHelperFactory(
+  client: CustomPseudonymisationClient
+) {
+  return new PseudonymisationHelper(client);
+}
+----
+
+=== Inject the PseudonymisationHelper
+Then register the PseudonymisationHelper that uses PseudoHelperFactory to create instances of that service.
+
+Sample code in your Angular provider configuration
+[source,javascript]
+----
+import {PseudonymisationHelper} from "@smals-belgium-shared/pseudo-helper/dist";
+import { CustomPseudonymisationClient} from "../client/customPseudonymisation.client";
+import {PseudonymisationHelperFactory} from "../factories/PseudonymisationHelper.factory";
+
+...
+  providers: [
+    {
+      provide: PseudonymisationHelper,
+      userFactory: PseudonymisationHelperFactory,
+      deps: [CustomPseudonymisationClient]
+    }
+...
+----
+
+=== Creating the Pseudo Service
+Finally, create a custom service where you import the necessary module :
+[source,javascript]
+----
+import {PseudonymisationHelper} from '@smals-belgium-shared/pseudo-helper';
+
+@Injectable({providedIn: 'root'})
+export class PseudoService {
+  ...
+}
+----
+
+==== Creating the PleudonymisationHelper and the domain
+Create a new Pseudonymisation Domain, which is essentially a set of factories allowing you to create and manipulate different objects for applying pseudonymisation operations.
+
+===== Sample code to create the domain
+[source,javascript]
+----
+export class PseudoService {
+  private pseudonymisationDomain: Domain;
+
+  constructor(
+    private configService: ConfigurationService,
+    private pseudomationHelper: PseudonymisationHelper,
+  ) {
+    this.pseudonymisationDomain = this.pseudomationHelper.createDomain(${domainKey}, Curve.p521, this.pseudoApiUrl, 8);
+  }
+}
+----
+
+*Explanation:*
+
+* *PseudoHelper:* This is the core helper from the pseudonymization package. It provides utilities for pseudonymisation processes.
+* *createDomain:* Creates a new domain which will be the entry point of pseudonymization process. You need to pass the following parameters:
+** *domainKey:* The key identifying the domain.
+** *crv:* The cryptographic curve to be used. At the moment, the default value is _Curve.p521_
+** *audience:* The intended audience of the domain.
+** *bufferSize:* The size of the buffer for cryptographic operations.
+
+===== Use the Domain
+Once the domain has been created, you can use it to pseudonymize or identify values. The pseudonymized value can then be passed into the Pseudonymisation Client.
+
+==== Sample Code for *Pseudonymizing* a value:
+[source,javascript]
+----
+async pseudonymize(value: string): Promise<string> {
+    return await this.pseudonymisationDomain.valueFactory.fromString(value).pseudonymize().then((res: PseudonymInTransit | EHealthProblem) => {
+      if (res instanceof EHealthProblem) {
+        throw new Error(res.detail)
+      }
+      return res.asString()
+    })
+  }
+----
+
+*Explanation:*
+
+* *valueFactory:* Returns the ValueFactory of this domain.
+** *ValueFactory:* Allows to create Value for a Domain.
+** *Value:* Wrapper around an elliptic curve point representing a value, that provides useful methods to manipulate it.
+* *fromString(value):* Creates a Value from the given String. The string will be internally converted to an array of bytes using UTF-8 Charset.
+** *value:* String to convert to Value
+** *InvalidValueExeption:* Throws an InvalidValueException If the value cannot be converted to a Value (if the value is too long).
+* *pseudonymize:* Convert this Value to its Pseudonym representation.
+* *result:* A random PseudonymInTransit for this Value or an EHealthProblem.
+** *PseudonymInTransit:* Wrapper around an elliptic curve point that provides useful methods to manipulate eHealth pseudonyms.
+*** *asString():* Returns the standard String representation of this PseudonymInTransit.
+It returns the Base64 URL representation of the uncompressed SEC1 representation of the point followed by : and by the String representation of the TransitInfo (JWE compact). +
+_Prefer this method instead of #asShortString() when the length of the String is not very important, because it avoids the recipient of this PseudonymInTransit to compute the Y coordinate of the point._
+** *EHealthProblem:* The error object has following properties:
+
+----
+class EHealthProblem {
+  type: string;
+  title: string;
+  status: string;
+  detail: string;
+  inResponseTo: string;
+}
+----
+
+==== Sample Code for *Pseudonymizing* multiple values:
+[source,javascript]
+----
+async pseudonymizeMultiple(values: string[]): Promise<string[]> {
+    if (!this.configService.getEnvironmentVariable('enablePseudo')) {
+      return values;
+    }
+
+    const asValues = values.map(value => this.pseudonymisationDomain.valueFactory.fromString(value));
+    return await this.pseudonymisationDomain.valueFactory.multiple(asValues).pseudonymize().then((res: MultiplePseudonymInTransit | EHealthProblem) => {
+      if (res instanceof EHealthProblem) {
+        throw new Error(res.detail);
+      }
+
+      let pseudonymizedValuesAsString = [];
+      for (let i = 0; i < res.lengthPoints(); i++) {
+        let point = res.getPoint(i);
+        if (!(point instanceof EHealthProblem)) {
+          pseudonymizedValuesAsString.push(point.asString());
+        } else {
+          throw new Error(point.detail);
+        }
+      }
+
+      return pseudonymizedValuesAsString;
+    });
+  }
+----
+
+*Explanation:*
+
+* *valueFactory:* Returns the ValueFactory of this domain.
+** *ValueFactory:* Allows to create Value for a Domain.
+* *fromString(value):* Creates a Value from the given String. The string will be internally converted to an array of bytes using UTF-8 Charset.
+** *value:* String to convert to Value
+** *InvalidValueExeption:* Throws an InvalidValueException If the value cannot be converted to a Value (if the value is too long).
+* *multiple(asValues):* Creates a MultipleValue object from the given Value array.
+* *pseudonymize:* Convert the MultipleValue object to its MultiplePseudonymInTransit representation.
+* *result:* A MultiplePseudonymInTransit corresponding to the input MultipleValue or an EHealthProblem.
+** *MultiplePseudonymInTransit:* Wrapper around an elliptic curve point that provides useful methods to manipulate eHealth pseudonyms.
+*** *getPoint():* Returns the computed PseudonymInTransit
+**** *asString():* Returns the standard String representation of this PseudonymInTransit.
+It returns the Base64 URL representation of the uncompressed SEC1 representation of the point followed by : and by the String representation of the TransitInfo (JWE compact). +
+_Prefer this method instead of #asShortString() when the length of the String is not very important, because it avoids the recipient of this PseudonymInTransit to compute the Y coordinate of the point._
+** *EHealthProblem:* The error object has following properties:
+
+----
+class EHealthProblem {
+  type: string;
+  title: string;
+  status: string;
+  detail: string;
+  inResponseTo: string;
+}
+----
+
+==== Sample Code to *Identify* multiple values :
+[source,javascript]
+----
+async identify(value: string): Promise<string> {
+    return await this.pseudonymisationDomain.pseudonymInTransitFactory.fromSec1AndTransitInfo(value).identify().then((res: Value | EHealthProblem) => {
+      if (res instanceof EHealthProblem) {
+        throw new Error(res.detail)
+      }
+      return res.asString()
+    })
+  }
+----
+
+*Explanation:*
+
+* *pseudonymInTransitFactory:* Allows to create PseudonymInTransit for a Domain.
+* *fromSec1AndTransitInfo(value):* Return A PseudonymInTransit created from the given  sec1AndTransitInfo.
+** *value:* Base64 URL string representation (without padding) of the SEC1 encoded point (can be SEC1 compressed or uncompressed format),
+followed by :, and by the string representation of the TransitInfo (JWE compact).
+** *InvaliedValueExeption:* Throws an InvalidValueException if the format of the given sec1AndTransitInfo is invalid
+* *identify:* Identify (de-pseudonymise) this PseudonymInTransit.
+* *result:* The identified value or an EHealthProblem.
+*** *asString():* Returns the value as a String. Convenient method that converts the bytes array (representing UTF-8 characters) to a String. Use it for text values.
+
+==== Sample Code to *Identify* multiple values :
+[source, javascript]
+----
+async identifyMultiple(pseudonymsInTransitAsString: string[]): Promise<string[]> {
+    if (!this.configService.getEnvironmentVariable('enablePseudo')) {
+      return pseudonymsInTransitAsString;
+    }
+
+    const pseudonymsInTransit = pseudonymsInTransitAsString.map(pseudonymInTransit => this.pseudonymisationDomain.pseudonymInTransitFactory.fromSec1AndTransitInfo(pseudonymInTransit));
+
+    return await this.pseudonymisationDomain.pseudonymInTransitFactory.multiple(pseudonymsInTransit).identify().then((response: MultipleValue | EHealthProblem) => {
+      if (response instanceof EHealthProblem) {
+        throw new Error(response.detail);
+      }
+
+      let identifiedValuesAsString = [];
+      for (let i = 0; i < response.lengthPoints(); i++) {
+        let point = response.getPoint(i);
+        if (!(point instanceof EHealthProblem)) {
+          identifiedValuesAsString.push(point.asString());
+        } else {
+          throw new Error (point.detail);
+        }
+      }
+
+      return identifiedValuesAsString;
+    });
+  }
+----
+
+*Explanation:*
+
+* *pseudonymInTransitFactory:* Allows to create PseudonymInTransit for a Domain.
+** *fromSec1AndTransitInfo(pseudonymInTransit):* Return A PseudonymInTransit created from the given  sec1AndTransitInfo.
+*** *pseudonymInTransit:* Base64 URL string representation (without padding) of the SEC1 encoded point (can be SEC1 compressed or uncompressed format),
+followed by : and by the string representation of the TransitInfo (JWE compact).
+*** *InvaliedValueExeption:* Throws an InvalidValueException if the format of the given sec1AndTransitInfo is invalid
+** *multiple(pseudonymsInTransit) :* convert the input array of pseudonyms in transit to their corresponding MultiplePseudonymInTransit representation
+*** *MultiplePseudonymInTransit :*
+**** *identify:* Identify (de-pseudonymise) this PseudonymInTransit.
+**** *response:* The identified value array as a MultipleValue object or an EHealthProblem.
+***** *MultipleValue:* The object representation of the identified values
+***** *getPoint(${index}) :* Returns the identified Value
+******* *asString():* Returns the value as a String. Convenient method that converts the bytes array (representing UTF-8 characters) to a String. Use it for text values.
+
+== Explanation of the Domain
+The Domain interface represents either your own or a foreign domain and defines getter methods to access the factory for creating and manipulating objects within that domain.
+
+.Methods
+[source,javascript]
+----
+include::src/lib/Domain.ts[tag=methods]
+----
+
+=== ValueFactory
+The ValueFactory allows the creation of Value objects, such as a clear identifier to be pseudonymised.
+It serves as the entry point to pseudonymise an identifier or a string, or as the output when a pseudonym is identified (de-pseudonymised).
+
+.Methods
+[source,javascript]
+----
+include::src/lib/ValueFactory.ts[tag=methods]
+----
+
+=== PseudonymFactory
+The PseudonymFactory is responsible for creating Pseudonym objects from points on the curve X and Y. If the point is invalid then InvalidPseudonymError is thrown.
+
+.Methods
+[source,javascript]
+----
+include::src/lib/PseudonymFactory.ts[tag=methods]
+----
+
+=== PseudonymInTransitFactory
+This factory allows to create PseudonymInTransit objects from a pseudonym and a transitInfo.
+
+.Methods
+[source,javascript]
+----
+include::src/lib/PseudonymInTransitFactory.ts[tag=methods]
+----
+
+=== Value
+A Value object represents a clear identifier, it is a wrapper around an elliptic curve point representing a value, that provides useful methods to manipulate it.
+
+.Methods
+[source,javascript]
+----
+include::src/lib/Value.ts[tag=methods]
+----
+
+=== Pseudonym
+A Pseudonym object is a wrapper around an elliptic curve point that provides useful methods to manipulate eHealth pseudonyms.
+
+.Methods
+[source,javascript]
+----
+include::src/lib/Pseudonym.ts[tag=methods]
+----
+
+=== TransitInfo
+Transit info containing encrypted information about the PseudonymInTransit. It contains the encrypted headers iat, exp and scalar which is the scalar to use to "decrypt" the PseudonymInTransit. It also contains public headers like iat and exp.
+
+.Methods
+[source,javascript]
+----
+include::src/lib/TransitInfo.ts[tag=methods]
+----
+
+=== PseudonymInTransit
+A PseudonymInTransit object represents a pseudonymInTransit that contains a Pseudonym and TransitInfo objects.
+
+.Methods
+[source,javascript]
+----
+include::src/lib/PseudonymInTransit.ts[tag=methods]
+----
+
+== Cleartext values exceeding 32 bytes
+To come...
+
+== Cache
+To come...
+
+== References
+
+* {links-ehealth-doc} documentation
+* https://www.smalsresearch.be/basisprincipes-voor-een-moderne-pseudonimiseringsdienst/[Introductie tot de nieuwe eHealth pseudonimiseringsdienst] /
+https://www.smalsresearch.be/basisprincipes-voor-een-moderne-pseudonimiseringsdienst-2/[Introduction au nouveau service de pseudonymisation eHealth]
+* https://www.smalsresearch.be/download/presentations/20240606_webinar_pseudonimisatie_PRINT.pdf[Privacy in Practice Smart Pseudonymisation]
+

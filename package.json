@@ -1,0 +1,43 @@
+{
+  "name": "@smals-belgium-shared/pseudo-helper",
+  "version": "1.0.5",
+  "description": "Pseudonimization helper (Blind, Unblind, ...)",
+  "type": "module",
+  "exports": "./index.mjs",
+  "types": "./index.d.ts",
+  "repository": {
+    "type": "git",
+    "url": "https://github.com/smals-belgium/pseudo-helper-js.git"
+  },
+  "keywords": [
+    "pseudonimization",
+    "pseudonimisation",
+    "javascript"
+  ],
+  "author": "smals-ddv",
+  "license": "LGPL-3.0-or-later",
+  "scripts": {
+    "test": "jest --config jest.config.js test/unit",
+    "test:e2e": "jest --config jest.config.js test/e2e",
+    "build": "node build.js"
+  },
+  "dependencies": {
+    "@smals-belgium-shared/pseudo-helper": "^1.0.0",
+    "bn.js": "^5.2.1",
+    "buffer": "^6.0.3",
+    "elliptic": "^6.5.7",
+    "jose": "^5.9.2",
+    "uuid": "^10.0.0"
+  },
+  "devDependencies": {
+    "@rollup/plugin-typescript": "^11.1.6",
+    "@types/jest": "^29.5.13",
+    "axios": "^1.7.7",
+    "jest": "^29.7.0",
+    "jest-environment-jsdom": "^29.7.0",
+    "rollup": "^4.21.3",
+    "ts-jest": "^29.2.5",
+    "tslib": "^2.7.0",
+    "typescript": "~5.1.0"
+  }
+}
