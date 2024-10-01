@@ -32,6 +32,14 @@ exec('rollup -c', (error, stderr, stdout) => {
     console.log('Copied README.adoc successfully!');
   });
 
+  copyFile('./README.md', './dist/README.md', err => {
+    if (err) {
+      console.error('Error copying README.md:', err);
+      return;
+    }
+    console.log('Copied README.md successfully!');
+  });
+
   copyFile('./LICENSE', './dist/LICENSE', err => {
     if (err) {
       console.error('Error copying LICENSE:', err);
