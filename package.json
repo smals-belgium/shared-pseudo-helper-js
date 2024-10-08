@@ -1,6 +1,6 @@
 {
   "name": "@smals-belgium-shared/pseudo-helper",
-  "version": "1.0.7",
+  "version": "1.1.0",
   "description": "Pseudonimization helper (Blind, Unblind, ...)",
   "type": "module",
   "exports": "./index.mjs",
