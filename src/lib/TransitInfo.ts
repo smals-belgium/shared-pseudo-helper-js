@@ -27,7 +27,6 @@ export interface TransitInfo {
    */
   audience(): string;
 
-
   /**
    * Validate the header of this {@link TransitInfo}.
    *
@@ -35,5 +34,13 @@ export interface TransitInfo {
    */
   validateHeader(): void;
 
+  /**
+   * Retrieves the protected (unencrypted) headers as a Map containing key-value pairs.
+   *
+   * This map contains the headers {@code aud}, {@code kid}, {@code iat}, {@code exp}, {@code alg} and {@code enc}.
+   *
+   * @return {Map<string, string | number>} A Map where each key is a header name and each value is the corresponding header value.
+   */
+  get headers(): Map<string, string | number>;
 }
 
