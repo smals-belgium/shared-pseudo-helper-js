@@ -1,5 +1,6 @@
 name: Reduce README
 on:
+  workflow_dispatch:
   push:
     paths:
       - README-source.adoc
