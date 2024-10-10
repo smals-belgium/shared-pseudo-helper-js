@@ -24,12 +24,12 @@ exec('rollup -c', (error, stderr, stdout) => {
     console.log('Copied package.json successfully!');
   });
 
-  copyFile('./README.adoc', './dist/README.adoc', err => {
+  copyFile('./README-source.adoc', './dist/README.adoc', err => {
     if (err) {
-      console.error('Error copying README.adoc:', err);
+      console.error('Error copying README-source.adoc:', err);
       return;
     }
-    console.log('Copied README.adoc successfully!');
+    console.log('Copied README-source.adoc successfully!');
   });
 
   copyFile('./README.md', './dist/README.md', err => {
