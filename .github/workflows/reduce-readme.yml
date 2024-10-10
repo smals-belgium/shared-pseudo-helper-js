@@ -20,3 +20,4 @@ jobs:
         uses: EndBug/add-and-commit@v9
         with:
           add: README.adoc
+          github_token: ${{ secrets.GITHUB_TOKEN }} 
