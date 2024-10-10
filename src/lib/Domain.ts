@@ -4,7 +4,7 @@ import {PseudonymInTransitFactory} from './PseudonymInTransitFactory';
 
 
 export interface Domain {
-
+  // tag::methods[]
   /**
    * Returns the {@link ValueFactory} of this domain.
    *
@@ -32,6 +32,6 @@ export interface Domain {
    * @return the key of this domain
    */
   get key(): string;
-
+  // end::methods[]
 }
 

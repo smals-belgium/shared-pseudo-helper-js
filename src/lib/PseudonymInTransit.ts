@@ -4,8 +4,7 @@ import {Pseudonym} from "./Pseudonym";
 import {EHealthProblem} from "./EHealthProblem";
 
 export interface PseudonymInTransit extends Pseudonym {
-
-
+  // tag::methods[]
   /**
    * Returns the standard String representation of this {@link PseudonymInTransit}.
    * <p>
@@ -45,6 +44,6 @@ export interface PseudonymInTransit extends Pseudonym {
    * @return the {@link TransitInfo}
    */
   get transitInfo(): TransitInfo;
-
+  // end::methods[]
 }
 

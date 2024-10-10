@@ -9,7 +9,7 @@ import {InvalidTransitInfoError} from "./errors/InvalidTransitInfoError";
  * It also contains public headers like {@code iat} and {@code exp}.
  */
 export interface TransitInfo {
-
+  // tag::methods[]
   /**
    * Returns the JWE compact representation if this {@link TransitInfo}.
    *
@@ -42,5 +42,6 @@ export interface TransitInfo {
    * @return {Map<string, string | number>} A Map where each key is a header name and each value is the corresponding header value.
    */
   get headers(): Map<string, string | number>;
+  // end::methods[]
 }
 

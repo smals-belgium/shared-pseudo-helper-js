@@ -5,7 +5,7 @@ import {MultiplePoint} from "./MultiplePoint";
 
 
 export interface MultiplePseudonymInTransit extends MultiplePoint<PseudonymInTransit | EHealthProblem> {
-
+ // tag::methods[]
   /**
    * Identify (de-pseudonymise) the {@link PseudonymInTransit}s of this collection.
    *
@@ -19,5 +19,6 @@ export interface MultiplePseudonymInTransit extends MultiplePoint<PseudonymInTra
    * or an {@link EHealthProblem} if an error occurs during the identification process.
    */
   identify(): Promise<MultipleValue | EHealthProblem>;
+  // end::methods[]
 }
 

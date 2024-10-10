@@ -2,8 +2,7 @@
  * Implement this interface to call the eHealth Pseudonymisation service.
  */
 export interface PseudonymisationClient {
-
-
+  // tag::methods[]
   /**
    * Call to /pseudo/v1/domains/{domainKey} and return a Future of the response as a String.
    * <p>
@@ -49,5 +48,5 @@ export interface PseudonymisationClient {
    * @return the response as a String
    */
   pseudonymizeMultiple(domainKey: string, payload: string): Promise<string>;
-
+  // end::methods[]
 }

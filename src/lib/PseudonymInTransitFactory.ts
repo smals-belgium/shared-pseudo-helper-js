@@ -7,7 +7,7 @@ import {InvalidPseudonymError} from "./errors/InvalidPseudonymError";
  * Allows to create {@link PseudonymInTransit} for a {@link Domain}.
  */
 export interface PseudonymInTransitFactory {
-
+  // tag::methods[]
   /**
    * @param pseudonym   the {@link Pseudonym} part of the {@link PseudonymInTransit}
    * @param transitInfo the {@link TransitInfo} part ot the {@link PseudonymInTransit}
@@ -47,9 +47,10 @@ export interface PseudonymInTransitFactory {
    * The items (references) of the given collection are copied to returned {@link MultiplePseudonymInTransit}.
    * Changes done on the collection will not be reflected on the returned {@link MultiplePseudonymInTransit}.
    *
-   * @param pseudonymsInTransit {@link Collection} of items to copy in the returned {@link MultiplePseudonymInTransit}
-   * @return a {@link PseudonymsInTransitCollection} containing the items of the given {@link Array}
+   * @param pseudonymsInTransit {@link Array} of items to copy in the returned {@link MultiplePseudonymInTransit}
+   * @return a {@link MultiplePseudonymInTransit} containing the items of the given {@link Array}
    */
   multiple(pseudonymsInTransit: Array<PseudonymInTransit>): MultiplePseudonymInTransit;
+  // end::methods[]
 }
 

@@ -5,7 +5,7 @@ import {MultipleValue} from "./MultipleValue";
  * Allows to create {@link Value} for a {@link Domain}.
  */
 export interface ValueFactory {
-
+  // tag::methods[]
   /**
    * Returns the maximum size of the value (as bytes) that can be converted in a Point.
    * <p>
@@ -52,5 +52,6 @@ export interface ValueFactory {
    * @return a {@link MultipleValue} containing the items of the given {@link Array}
    */
   multiple(values: Array<Value>): MultipleValue;
+  // end::methods[]
 }
 

@@ -5,7 +5,7 @@ import {InvalidPseudonymError} from "./errors/InvalidPseudonymError";
  * Allows to create {@link Pseudonym} for a {@link Domain}.
  */
 export interface PseudonymFactory {
-
+  // tag::methods[]
   /**
    * Create a {@link Pseudonym} from the given X coordinate.
    * <p>
@@ -34,6 +34,6 @@ export interface PseudonymFactory {
    * @throws InvalidPseudonymError If the coordinates or the format are invalid.
    */
   fromSec1(sec1: string): Pseudonym;
-
+  // end::methods[]
 }
 

@@ -7,7 +7,7 @@ import {EHealthProblem} from "./EHealthProblem";
  * Wrapper around an elliptic curve point representing a value, that provides useful methods to manipulate it.
  */
 export interface Value extends Point {
-
+  // tag::methods[]
   /**
    * Returns the value as a bytes array.
    * <p>
@@ -43,6 +43,6 @@ export interface Value extends Point {
    * @return a random {@link PseudonymInTransit} for this {@link Value}.
    */
   pseudonymize(): Promise<PseudonymInTransit | EHealthProblem>;
-
+  // end::methods[]
 }
 
