@@ -26,6 +26,8 @@ jobs:
       uses: snyk/actions/node@master
       env:
         SNYK_TOKEN: ${{ secrets.SNYK_TOKEN }}
+      with:
+        args: --policy-path=.snyk
     - name: Use Node.js ${{ matrix.node-version }}
       uses: actions/setup-node@v4
       with:
