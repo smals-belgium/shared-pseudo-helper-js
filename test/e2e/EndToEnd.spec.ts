@@ -23,6 +23,24 @@ describe('End to end testing', () => {
     }
   });
 
+
+  test('pseudonymize/identify zeros bytearray', async () => {
+    const inputByteArray = new Uint8Array([0, 0, 0, 0]);
+    try {
+      let data = await domain.valueFactory.fromArray(inputByteArray).pseudonymize();
+      if (!(data instanceof EHealthProblem)) {
+        data = data as PseudonymInTransit;
+        let value = await data.identify();
+        if (!(value instanceof EHealthProblem)) {
+          expect(value.asBytes()).toEqual(inputByteArray);
+        }
+      }
+    } catch (e) {
+      throw e;
+    }
+  });
+
+
   test('pseudonymizeMultiple/IdentifyMultiple', async () => {
     const inputSsins = ['12587488890', '99545454444', '12345678977']
     const values = [domain.valueFactory.fromString(inputSsins[0])

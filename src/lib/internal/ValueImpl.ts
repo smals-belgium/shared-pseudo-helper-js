@@ -14,7 +14,7 @@ export class ValueImpl extends PseudonymImpl implements Value {
   }
 
   asBytes(): Uint8Array {
-    const x = this._ecPoint.x.toArrayLike(Buffer, 'be');
+    const x = this._ecPoint.x.toArrayLike(Buffer, 'be', 66);
     const valueLengthPos = x.length - this._domain.bufferSize - 1;
     const valueLength = x[valueLengthPos];
     const startPosition = valueLengthPos - valueLength;
