@@ -111,7 +111,7 @@ import {PseudonymisationHelperFactory} from "../factories/PseudonymisationHelper
   providers: [
     {
       provide: PseudonymisationHelper,
-      userFactory: PseudonymisationHelperFactory,
+      useFactory: PseudonymisationHelperFactory,
       deps: [CustomPseudonymisationClient]
     }
 ...
