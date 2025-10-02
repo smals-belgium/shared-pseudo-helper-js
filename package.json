@@ -3,7 +3,12 @@
   "version": "1.1.1",
   "description": "Pseudonimization helper (Blind, Unblind, ...)",
   "type": "module",
-  "exports": "./index.mjs",
+  "exports": {
+    ".": {
+      "types": "./index.d.ts",
+      "import": "./index.mjs"
+    }
+  },
   "types": "./index.d.ts",
   "repository": {
     "type": "git",
