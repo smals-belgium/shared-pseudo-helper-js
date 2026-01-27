@@ -1,4 +1,11 @@
-ignore:
+version: v1.22.0
+ignore: 
   'SNYK-JS-ELLIPTIC-8187303':
     - '*':
-        reason: "This vulnerability only affects signature verification algo that we don't use in this lib"
+        reason: "Usage of the library is restricted to non-sensitive internal operations where this specific flaw is not reachable."
+        expires: 2026-12-31
+
+  'SNYK-JS-ELLIPTIC-1064899':
+    - '*':
+        reason: "The vulnerability resides in the ECDSA signature generation logic (incorrect k-value truncation). Our current implementation only uses basic scalar multiplication (EC.mul) and does not call the sign() method."
+        expires: 2026-12-31
