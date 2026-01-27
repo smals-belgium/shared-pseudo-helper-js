@@ -23,6 +23,21 @@ describe('End to end testing', () => {
     }
   });
 
+  test('pseudonymize/identify long string', async () => {
+    const inputSsin = '1258748889012587488890125874888901258748';
+    try {
+      let data = await domain.valueFactory.fromString(inputSsin).pseudonymize();
+      if (!(data instanceof EHealthProblem)) {
+        data = data as PseudonymInTransit;
+        let value = await data.identify();
+        if (!(value instanceof EHealthProblem)) {
+          expect(value.asString()).toBe(inputSsin);
+        }
+      }
+    } catch (e) {
+      throw e;
+    }
+  });
 
   test('pseudonymize/identify zeros bytearray', async () => {
     const inputByteArray = new Uint8Array([0, 0, 0, 0]);

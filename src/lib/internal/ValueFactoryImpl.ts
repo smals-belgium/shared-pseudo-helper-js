@@ -16,8 +16,8 @@ export class ValueFactoryImpl extends PointFactory implements ValueFactory {
   constructor(domain: Domain) {
     super(domain);
 
-    //Arbitrary defined by eHealth. Could have been curve field size / 8  - buffer size -1
-    this._maxValueSize = 32;
+    // Equivalent to Java implementation: maxValueSize = curve field size / 8 - buffer size - 1
+    this._maxValueSize = Math.floor(this._domain.ec.curve._bitLength / 8) - this._domain.bufferSize - 1;
   }
 
   fromArray(value: Uint8Array): Value {
